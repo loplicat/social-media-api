@@ -38,3 +38,18 @@ User = get_user_model()
 def create_user_profile_post_save(sender, instance, created, *args, **kwargs):
     if created:
         Profile.objects.create(user=instance)
+
+
+class Follow(models.Model):
+    follower = models.ForeignKey(
+        Profile, on_delete=models.CASCADE, related_name="following"
+    )
+    following = models.ForeignKey(
+        Profile, on_delete=models.CASCADE, related_name="followers"
+    )
+
+    def __str__(self):
+        return f"{self.follower} follows {self.following}"
+
+    class Meta:
+        unique_together = (("follower", "following"),)
