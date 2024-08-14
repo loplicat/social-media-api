@@ -16,11 +16,9 @@ class Profile(models.Model):
     profile_image = models.ImageField(
         null=False, upload_to=UploadToPath("profile_image/"), default="default.jpg"
     )
-    username = models.CharField(
-        max_length=100, unique=True, default="user" + str(uuid.uuid4())
-    )
-    first_name = models.CharField(max_length=100, null=True, blank=True)
-    last_name = models.CharField(max_length=100, null=True, blank=True)
+    username = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
     bio = models.CharField(max_length=200, null=True, blank=True)
 
     @property
@@ -84,7 +82,6 @@ class Post(models.Model):
 
 
 class PostLike(models.Model):
-    liked = models.BooleanField(null=True)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="likes")
     liked_by = models.ForeignKey(
         Profile, on_delete=models.CASCADE, related_name="likes"
