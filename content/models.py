@@ -16,7 +16,7 @@ class Profile(models.Model):
     profile_image = models.ImageField(
         null=False, upload_to=UploadToPath("profile_image/"), default="default.jpg"
     )
-    username = models.CharField(max_length=100)
+    username = models.CharField(max_length=100, unique=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     bio = models.CharField(max_length=200, null=True, blank=True)
@@ -35,7 +35,7 @@ User = get_user_model()
 @receiver(post_save, sender=User)
 def create_user_profile_post_save(sender, instance, created, *args, **kwargs):
     if created:
-        Profile.objects.create(user=instance)
+        Profile.objects.create(user=instance, username="user%s" % (instance.id,))
 
 
 class Follow(models.Model):
