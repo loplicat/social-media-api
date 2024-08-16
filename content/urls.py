@@ -6,11 +6,13 @@ from content.views import (
     ProfileViewSet,
     FollowersView,
     FollowingView,
+    PostViewSet,
 )
 
 router = routers.DefaultRouter()
 
 router.register("profiles", ProfileViewSet)
+router.register("posts", PostViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),
