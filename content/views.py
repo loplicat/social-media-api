@@ -22,6 +22,7 @@ from content.serializers import (
     PostListSerializer,
     PostDetailListSerializer,
     CommentSerializer,
+    PostLikeSerializer,
 )
 
 
@@ -152,6 +153,8 @@ class PostViewSet(ModelViewSet):
             self.serializer_class = PostListSerializer
         if self.action == "retrieve":
             self.serializer_class = PostDetailListSerializer
+        if self.action in ("like", "unlike"):
+            self.serializer_class = PostLikeSerializer
         return self.serializer_class
 
     def get_queryset(self):
@@ -168,6 +171,48 @@ class PostViewSet(ModelViewSet):
             )
         )
         return queryset
+
+    @action(
+        methods=["POST"],
+        detail=True,
+        url_path="like",
+        permission_classes=[IsAuthenticated],
+    )
+    def like(self, request, pk=None):
+        post = get_object_or_404(Post, pk=pk)
+        user_profile = self.request.user.profile
+        if PostLike.objects.filter(liked_by=user_profile, post=post).exists():
+            return Response(
+                {"detail": "You already liked this post."},
+                status=status.HTTP_409_CONFLICT,
+            )
+        PostLike.objects.create(liked_by=user_profile, post=post)
+        return Response(
+            {"detail": "You liked this post."},
+            status=status.HTTP_204_NO_CONTENT,
+        )
+
+    @action(
+        methods=["POST"],
+        detail=True,
+        url_path="unlike",
+        permission_classes=[IsAuthenticated],
+    )
+    def unlike(self, request, pk=None):
+        post = get_object_or_404(Post, pk=pk)
+        user_profile = self.request.user.profile
+        try:
+            like = PostLike.objects.get(liked_by=user_profile, post=post)
+            like.delete()
+            return Response(
+                {"detail": "You unliked this post."},
+                status=status.HTTP_204_NO_CONTENT,
+            )
+        except PostLike.DoesNotExist:
+            return Response(
+                {"detail": "You already unliked this post."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
 
 class CommentViewSet(ModelViewSet):
