@@ -8,7 +8,7 @@ from rest_framework.generics import (
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
-from content.models import Profile, Follow, Post, PostLike
+from content.models import Profile, Follow, Post, PostLike, Comment
 from content.permissions import IsAuthorOrReadOnly
 from content.serializers import (
     ProfileSerializer,
@@ -19,6 +19,7 @@ from content.serializers import (
     PostSerializer,
     PostListSerializer,
     PostDetailListSerializer,
+    CommentSerializer,
 )
 
 
@@ -114,3 +115,18 @@ class PostViewSet(ModelViewSet):
             )
         )
         return queryset
+
+
+class CommentViewSet(ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
+
+    def get_queryset(self):
+        queryset = Comment.objects.select_related("author", "post").filter(
+            post_id=self.kwargs["post_id"]
+        )
+        return queryset
+
+    def perform_create(self, serializer):
+        post = get_object_or_404(Post, id=self.kwargs.get("post_id"))
+        serializer.save(author=self.request.user.profile, post=post)

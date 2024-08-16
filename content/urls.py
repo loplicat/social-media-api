@@ -7,12 +7,14 @@ from content.views import (
     FollowersView,
     FollowingView,
     PostViewSet,
+    CommentViewSet,
 )
 
 router = routers.DefaultRouter()
 
 router.register("profiles", ProfileViewSet)
 router.register("posts", PostViewSet)
+router.register(r"posts/(?P<post_id>\d+)/comments", CommentViewSet, "post-comments")
 
 urlpatterns = [
     path("", include(router.urls)),
