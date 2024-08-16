@@ -72,6 +72,18 @@ class ProfileViewSet(
             followers_count=Count("followers"),
             following_count=Count("following"),
         )
+
+        username = self.request.query_params.get("username")
+        if username:
+            queryset = queryset.filter(username__iexact=username)
+
+        first_name = self.request.query_params.get("first_name")
+        if first_name:
+            queryset = queryset.filter(first_name__iexact=first_name)
+
+        last_name = self.request.query_params.get("last_name")
+        if last_name:
+            queryset = queryset.filter(last_name__iexact=last_name)
         return queryset
 
     @action(
@@ -170,6 +182,12 @@ class PostViewSet(ModelViewSet):
                 ),
             )
         )
+
+        hashtags = self.request.query_params.get("hashtag")
+        if hashtags:
+            queryset = queryset.filter(
+                hashtags__title__in=hashtags.strip("/").split(",")
+            )
         return queryset
 
     @action(
