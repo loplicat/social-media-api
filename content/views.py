@@ -1,4 +1,6 @@
 from django.db.models import Count, Exists, OuterRef
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.generics import (
@@ -135,6 +137,29 @@ class ProfileViewSet(
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "username",
+                type=OpenApiTypes.STR,
+                description="Search profiles by username (ex. ?username=john)",
+            ),
+            OpenApiParameter(
+                "first_name",
+                type=OpenApiTypes.STR,
+                description="Filter by first name" "name (ex. ?first_name=John)",
+            ),
+            OpenApiParameter(
+                "last_name",
+                type=OpenApiTypes.STR,
+                description="Filter by last name" "name (ex. ?last_name=Doe)",
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        """Get list of profiles."""
+        return super().list(request, *args, **kwargs)
+
 
 class FollowersView(ListAPIView):
     serializer_class = FollowerSerializer
@@ -183,7 +208,7 @@ class PostViewSet(ModelViewSet):
             )
         )
 
-        hashtags = self.request.query_params.get("hashtag")
+        hashtags = self.request.query_params.get("hashtags")
         if hashtags:
             queryset = queryset.filter(
                 hashtags__title__in=hashtags.strip("/").split(",")
@@ -268,6 +293,19 @@ class PostViewSet(ModelViewSet):
         queryset = self.get_queryset().filter(likes__liked_by=user_profile)
         serializer = PostListSerializer(queryset, many=True)
         return Response(serializer.data)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "hashtags",
+                type={"type": "list", "items": {"type": "string"}},
+                description="Filter by hashtags titles (ex. ?hashtags=django,python)",
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        """Get list of posts."""
+        return super().list(request, *args, **kwargs)
 
 
 class CommentViewSet(ModelViewSet):
