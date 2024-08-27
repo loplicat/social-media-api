@@ -26,6 +26,7 @@ from content.serializers import (
     CommentSerializer,
     PostLikeSerializer,
 )
+from content.tasks import create_scheduled_post
 
 
 class CurrentUserProfileView(RetrieveUpdateDestroyAPIView):
@@ -183,7 +184,15 @@ class PostViewSet(ModelViewSet):
     serializer_class = PostSerializer
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user.profile)
+        schedule_date = self.request.data.get("schedule_date", None)
+
+        if schedule_date:
+            serializer.validated_data["author_id"] = self.request.user.profile.id
+            create_scheduled_post.apply_async(
+                args=[serializer.validated_data], eta=schedule_date
+            )
+        else:
+            serializer.save(author=self.request.user.profile)
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -197,7 +206,7 @@ class PostViewSet(ModelViewSet):
     def get_queryset(self):
         user_profile = self.request.user.profile
         queryset = (
-            Post.objects.select_related("author")
+            self.queryset.select_related("author")
             .prefetch_related("hashtags")
             .annotate(
                 likes_count=Count("likes"),
@@ -206,6 +215,7 @@ class PostViewSet(ModelViewSet):
                     PostLike.objects.filter(liked_by=user_profile, post=OuterRef("pk"))
                 ),
             )
+            .order_by("-pub_date")
         )
 
         hashtags = self.request.query_params.get("hashtags")
