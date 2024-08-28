@@ -1,65 +1,118 @@
-## Description:
+# Social Media API
 
-You are tasked with building a RESTful API for a social media platform. The API should allow users to create profiles, follow other users, create and retrieve posts, manage likes and comments, and perform basic social media actions.
-
-## Requirements:
-
-### User Registration and Authentication:
-
-- Users should be able to register with their email and password to create an account.
-- Users should be able to login with their credentials and receive a token for authentication.
-- Users should be able to logout and invalidate their token.
+This repository contains a RESTful API built in Django and Django REST Framework for a social media platform. 
+The API allows to users to create profiles, follow other users, create and retrieve posts, manage likes and comments,
+and perform basic social media actions.
 
 
-## User Profile:
+## How to Use
+1.  Clone the repository
+```bash
+git clone https://github.com/loplicat/social-media-api.git
+```
 
-- Users should be able to create and update their profile, including profile picture, bio, and other details.
-- Users should be able to retrieve their own profile and view profiles of other users.
-- Users should be able to search for users by username or other criteria.
-
-
-## Follow/Unfollow:
-
-- Users should be able to follow and unfollow other users.
-- Users should be able to view the list of users they are following and the list of users following them.
-
-
-## Post Creation and Retrieval:
-
-- Users should be able to create new posts with text content and optional media attachments (e.g., images). (Adding images is optional task)
-- Users should be able to retrieve their own posts and posts of users they are following.
-- Users should be able to retrieve posts by hashtags or other criteria.
+2. Create a virtual environment and activate it:
+```bash
+python -m venv venv
+source venv/bin/activate
+```
+3. Install requirements:
+```bash
+pip install -r requirements.txt
+```
+4. Copy .env.sample -> .env and set up environmental variables.
 
 
-## Likes and Comments (Optional):
+5. Apply migrations and start the server:
+```bash
+python manage.py migrate
+python manage.py runserver
+```
+6. Run this command to load prepared data from the fixture:
+```bash
+python manage.py loaddata social_media_data.json
+```
 
-Users should be able to like and unlike posts. Users should be able to view the list of posts they have liked. Users should be able to add comments to posts and view comments on posts.
+7. Run Celery worker to enable scheduled posts:
+```bash
+celery -A social_media_api worker -l info
+```
 
-## Schedule Post creation using Celery (Optional):
+8. Run app:
+```bash
+python manage.py runserver
+```
 
-Add possibility to schedule Post creation (you can select the time to create the Post before creating of it).
+## API Endpoints
 
-## API Permissions:
+Below is a list of the API endpoints provided by the project:
 
-- Only authenticated users should be able to perform actions such as creating posts, liking posts, and following/unfollowing users.
-- Users should only be able to update and delete their own posts and comments.
-- Users should only be able to update and delete their own profile.
-
-## API Documentation:
-
-- The API should be well-documented with clear instructions on how to use each endpoint.
-- The documentation should include sample API requests and responses for different endpoints.
-
-
-## Technical Requirements:
-
-- Use Django and Django REST framework to build the API.
-- Use token-based authentication for user authentication.
-- Use appropriate serializers for data validation and representation.
-- Use appropriate views and viewsets for handling CRUD operations on models.
-- Use appropriate URL routing for different API endpoints.
-- Use appropriate permissions and authentication classes to implement API permissions.
-- Follow best practices for RESTful API design and documentation.
+- **Posts**: 
+  - `api/content/posts/`, 
+  - `api/content/posts/<pk>/comments/`,
+  - `api/content/posts/<pk>/like/`, 
+  - `api/content/posts/<pk>/unlike/`,
+  - `api/content/posts/my-posts/`,
+  - `api/content/posts/feed/`,
+  - `api/content/posts/liked/`
 
 
-> *Note*: You are not required to implement a frontend interface for this task. Focus on building a well-structured and well-documented RESTful API using Django and Django REST framework. This task will test the junior DRF developer's skills in building RESTful APIs, handling authentication and permissions, working with models, serializers, views, and viewsets, and following best practices for API design and documentation.
+- **Profiles**: 
+  - `api/content/profiles/`,
+  - `api/content/me/`,
+  - `api/content/me/followers/`,
+  - `api/content/me/following/`,
+  - `api/content/profiles/<pk>/follow/`,
+  - `api/content/profiles/<pk>/unfollow/`
+
+
+- **Users**: 
+  - `api/user/register/`,
+  - `api/user/me/`,
+  - `api/user/token/`,
+  - `api/user/token/refresh/`,
+  - `api/user/token/verify/`,
+  - `api/user/logout/`
+
+
+- **Documentation**:
+  - `api/doc/swagger/`
+
+Each endpoint supports a range of operations, including listing and creating. 
+Some of them provide operations of retrieving, updating, and filtering.
+
+
+## Main features
+
+* **User Profile Management**: Users can create, retrieve, and update their profiles, including profile pictures, bios,
+and other details. The API also provides endpoints to search for users based on usernames and other criteria.
+
+
+* **Follow/Unfollow**: Users can follow and unfollow other users, and retrieve lists of their followers and those they are
+following.
+
+
+*  **Post Creation and Management**: Users can create, retrieve, and update their posts, with text content and optional
+media attachments (images as an optional feature). The API provides ways to retrieve posts by a range of criteria
+including hashtags and authorship by followed users.
+
+
+* **Interactions**: Users can like/unlike posts, retrieve posts they have liked, and add comments to posts.
+
+
+* **User Registration and Authentication**: Users register with their email and passwords and receive a token upon login
+for subsequent authentication. The API also includes a logout function.
+
+
+* **Scheduled Post Creation**: Using Celery, users can schedule posts to be created at specific times.
+
+
+* **API Permissions**: The API uses Django's authentication and permission classes to ensure security and confidentiality.
+Only authenticated users can perform actions like creating posts, liking posts, and following/unfollowing others.
+
+
+* **API Documentation**: All the endpoints are well-documented by DRF Spectacular with clear instructions and examples for use.
+
+## DB Structure
+
+![Social Media Api DB](social-media-api-db.png)
