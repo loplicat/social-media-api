@@ -25,7 +25,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class ProfileListSerializer(ProfileSerializer):
-    is_followed_by_me = serializers.BooleanField(read_only=True)
+    is_followed_by_me = serializers.BooleanField(read_only=True, default=False)
 
     class Meta:
         model = Profile
@@ -78,8 +78,8 @@ class PostSerializer(serializers.ModelSerializer):
     author_full_name = serializers.CharField(source="author.full_name", read_only=True)
     author_image = serializers.ImageField(source="author.profile_image", read_only=True)
     hashtags = HashtagSerializer(many=True, read_only=True)
-    likes_count = serializers.IntegerField(read_only=True)
-    comments_count = serializers.IntegerField(read_only=True)
+    likes_count = serializers.IntegerField(read_only=True, default=0)
+    comments_count = serializers.IntegerField(read_only=True, default=0)
     schedule_date = serializers.DateTimeField(required=False, write_only=True)
 
     class Meta:
@@ -121,7 +121,7 @@ class PostSerializer(serializers.ModelSerializer):
 
 
 class PostListSerializer(PostSerializer):
-    liked_by_user = serializers.BooleanField(read_only=True)
+    liked_by_user = serializers.BooleanField(read_only=True, default=False)
 
     class Meta:
         model = Post
