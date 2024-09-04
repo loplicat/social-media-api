@@ -5,42 +5,57 @@ The API allows to users to create profiles, follow other users, create and retri
 and perform basic social media actions.
 
 
-## How to Use
-1.  Clone the repository
-```bash
-git clone https://github.com/loplicat/social-media-api.git
-```
-
+## Installation
+1. Clone the repository
+  ```bash
+  git clone https://github.com/loplicat/social-media-api.git
+  ```
 2. Create a virtual environment and activate it:
-```bash
-python -m venv venv
-source venv/bin/activate
-```
+  ```bash
+  python -m venv venv
+  source venv/bin/activate
+  ```
 3. Install requirements:
-```bash
-pip install -r requirements.txt
-```
-4. Copy .env.sample -> .env and set up environmental variables.
+  ```bash
+  pip install -r requirements.txt
+  ```
+
+4. Create new Postgres DB & User.
 
 
-5. Apply migrations and start the server:
+5. Copy .env.sample -> .env and set up environmental variables.
+
+
+6. Apply migrations:
 ```bash
 python manage.py migrate
-python manage.py runserver
 ```
-6. Run this command to load prepared data from the fixture:
+
+7. Load prepared data from the fixture:
 ```bash
 python manage.py loaddata social_media_data.json
 ```
 
-7. Run Celery worker to enable scheduled posts:
+8. Run Redis Server:
 ```bash
-celery -A social_media_api worker -l info
+docker run -d -p 6379:6379 redis
 ```
 
-8. Run app:
+9. Run Celery worker to enable scheduled posts:
+```bash
+celery -A social_media_api worker -l INFO
+```
+
+10. Run app:
 ```bash
 python manage.py runserver
+```
+
+## Run with docker
+Docker should be installed locally (no need to install Postgres)
+Copy .env.sample -> .env and set up environmental variables.
+```bash
+docker compose up --build
 ```
 
 ## API Endpoints
